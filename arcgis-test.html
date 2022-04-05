@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Arcgis test</title>
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+    <link rel="stylesheet" href="https://js.arcgis.com/4.22/esri/themes/light/main.css">
+    <script src="https://js.arcgis.com/4.22/"></script>    
+        
+    <style>
+    html, body {
+        padding: 0;
+        margin: 0;
+        width: 100%;
+        height: 100%;
+    }        
+    #viewDiv {
+        width: 100%;
+        height: 100%;
+    }
+    </style>    
+</head>
+<body>
+    <div id="viewDiv"></div>
+<script>
+
+    require(["esri/config", "esri/Map", "esri/views/MapView", "esri/symbols/MarkerSymbol"], function (esriConfig, Map, MapView, MarkerSymbol) {
+    
+    
+
+      esriConfig.apiKey = "AAPK9302152d7ae4460997198668c55954a6jbDR1yV5Q2g36iMOVkWnscW9wuMUArfYg7Rrj9RCM8aVa4xz9x5Z94Dh350xoUzB";
+      const map = new Map({
+        basemap: "arcgis-topographic",// Basemap layer
+        ground: "world-elevation"
+      });
+      
+      const view = new MapView({
+        map: map,
+        center: [103.85692, 1.2985],
+        zoom: 13, // scale: 72223.819286
+        container: "viewDiv",
+        constraints: {
+          snapToZoom: false
+        }
+      });
+      
+      /*
+    const view = new SceneView({
+      container: "viewDiv",
+      map: map,
+      camera: {
+        position: {
+          x: 103.85692, //Longitude
+          y: 1.2985, //Latitude
+          z: 2000 //Meters
+        },
+        tilt: 75
+      }      
+    });
+      */
+      
+  })  
+</script> 
+</body>
+</html>

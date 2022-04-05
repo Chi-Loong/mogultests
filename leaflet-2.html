@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Leaflet test 2</title>
+  <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">  
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A==" crossorigin="" />
+  <link rel="stylesheet" href="js/dist/MarkerCluster.css" />
+  <link rel="stylesheet" href="js/dist/MarkerCluster.Default.css" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+  <style>
+    #map { width: 100%; height: 600px; position: relative; z-index: 0;}
+    .point {
+        stroke-width: 1px;
+        stroke: cyan;
+    }
+    .point.selected{
+        stroke-width: 2px;
+        stroke: yellow;
+        cursor: pointer;
+    }
+    td {
+        font-size: 14px;
+    }
+    td.metric {
+        width: 40%;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="row">
+        <h3>Map interface - Leaflet +  ESRI basemap (topographical)</h3>
+        <div class="col-md-8">
+            <div id="map"></div>
+        </div>
+        <div class="col-md-4">
+            <div class="mt-2">
+                <table class="table table-sm mb-0">
+                  <tbody>
+                    <tr>
+                      <td class="metric">Address</td>
+                      <td id="address">-</td>
+                    </tr>
+                    <tr>
+                      <td class="metric">Postal Code</td>
+                      <td id="postal_code">-</td>
+                    </tr>
+                    <tr>
+                      <td class="metric">Housing Type</td>
+                      <td id="housing_type">-</td>
+                    </tr>
+                    <tr>
+                      <td class="metric">Flat Type</td>
+                      <td id="flat_type">-</td>
+                    </tr>
+                    <tr>
+                      <td class="metric">Flat Model</td>
+                      <td id="flat_model">-</td>
+                    </tr>
+                    <tr>
+                      <td class="metric">Town</td>
+                      <td id="town">-</td>
+                    </tr>
+                  </tbody>
+                </table>
+                <div id="aggregate_description"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script>
+<script src="js/dist/leaflet.markercluster.js"></script>
+<script src="https://unpkg.com/esri-leaflet@3.0.4/dist/esri-leaflet.js"></script>
+<script src="https://unpkg.com/esri-leaflet-vector@3.0.0/dist/esri-leaflet-vector.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+<script src="js/papaparse.min.js"></script>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script>
+
+
+var map = L.map('map').setView([1.381284, 103.8920047], 12);
+
+/*
+  const basemapEnum = "ArcGIS:Topographic";
+
+  L.esri.Vector.vectorBasemapLayer(basemapEnum, {
+     apiKey: "AAPK9302152d7ae4460997198668c55954a6jbDR1yV5Q2g36iMOVkWnscW9wuMUArfYg7Rrj9RCM8aVa4xz9x5Z94Dh350xoUzB",
+  }).addTo(map);
+*/
+
+L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
+    attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+    maxZoom: 18,
+    id: 'mapbox/streets-v11',
+    tileSize: 512,
+    zoomOffset: -1,
+    accessToken: 'pk.eyJ1IjoicGFwZXJkIiwiYSI6ImNsMHRidHNkZzA0YTUzZHBlN3V1ZHZ4ZHkifQ.a4xAGC285TVNBapaqOaYzA'
+}).addTo(map);
+
+/*                
+var svgLayer = L.svg();
+svgLayer.addTo(map);
+
+function project(d) {
+  return map.latLngToLayerPoint(new L.LatLng(d[1][0].latitude, d[1][0].longitude));
+}
+*/
+
+Papa.parse("data/sengkang_hdb.csv", {
+    delimiter: ",",
+    header:true,
+    download: true,
+    complete: results =>  {
+
+		let markersCluster = L.markerClusterGroup();
+		map.addLayer(markersCluster);
+
+		results.data.forEach(d => {
+
+			let title = d.address;
+			let marker = L.marker([d.latitude, d.longitude], {title: title});
+			marker.bindPopup(title);
+			markersCluster.addLayer(marker);
+		})
+
+		console.log(markersCluster);
+		map.addLayer(markersCluster);
+    }
+});
+
+</script>
+
+</body>
+</html>

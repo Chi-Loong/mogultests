@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <style>
+            #map {
+                width: 100vw;
+                height: 100vh;
+                x-overflow: none;
+                y-overflow: none
+            }
+        </style>
+    </head>
+    <body>
+        <div id="map"></div>
+        <script src="https://core.f4map.com/api.js?api_key=1Q72XC7B00SQA7S57UNV8XQ0Q4ZSTKY5KHSDAT7S"></script>
+        <script>
+            let mapOptions = {
+                zoom: 19,
+                center: new f4.map.LatLng(1.2961, 103.891)
+            }
+            
+            let map = new f4.map.Map('#map', mapOptions);
+        </script>
+    </body>
+</html>

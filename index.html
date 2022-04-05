@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mogul demos</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Mogul UX tests">
+    <meta name="author" content="Chi-Loong (www.mogul.sg)">
+    <meta name="google-site-verification" content="..." />
+
+    <meta property="og:title" content="ArcGIS-007 test">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="viz.vslashr.com/mogul">
+    <meta property="og:description" content="ArcGIS-007 test">
+
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:site" content="@mogulsg" />
+    <meta name="twitter:creator" content="@chiloong" />    
+</head>
+<body>
+    <style>
+    body { font-family:Helvetica, Arial, sans-serif; font-size:16px; }
+    </style>
+    <h2>Mogul F4 map tests</h2>
+    <ol>
+        <li>
+            <h4><a href="onemeyertest.html">F4 map using Meyer Mansion example</a>: 18th Jan</h4>
+            <ul>
+                <li>F4 map already has Meyer Mansion 3D model on it. Started with most <a href="basictest.html">basic test</a>.</li>
+                <li>Documentation is terrible. Certain examples from their code doesn't seem to work, and a lot of the CSS is hardcoded to F4's API interface. Wish I was working with something like Mapbox. Or ArcGIS.</li>
+                <li>How to add a listener event to HTML object that is passed to InfoWindow? Doesn't seem like  you can do so, and cursory testing explains why we can't tap on the screen.</li>
+                <li>Some of the irritating autoscroll is due to their library. Opening up a marker scrolls to that location - <a href="scrolltest.html">scrolltest</a></li>
+                <li>Wishlist: Code to zoom and do flyover / rotation (no example / documentation).</li>
+                <li>Wishlist: How to import three.js or WebGL object onto their WebGL canvas (no example / documentation).</li>
+            </ul>
+        </li>
+        <li>
+            <h4><a href="onemeyertest.html">Updated One Mayer test</a>: 25th Jan</h4>
+            <ul>
+                <li>Undocumented F4 function that allows you to set date and time and ensure that sun shadows are correct.</li>
+            </ul>
+        </li>
+        <li>
+            <h4><a href="iframetest.html">iFrame test</a>: 14th Feb</h4>
+            <ul>
+                <li>Simplest iFrame. Let's see if it works</li>
+                <li>Possibly no framekiller code at mogul.sg</li>
+            </ul>
+        </li>
+        <li>
+            <h4><a href="mapbox-test.html">Mapbox: 3D test</a>: 22nd Feb</h4>
+            <ul>
+                <li>Mapbox test of Yus' 3D model.</li>
+                <li><a href="mapbox-test-1a.html">Empty base map - no 2.5D</a></li>
+            </ul>
+        </li>
+    </ol>
+
+    <h2>ArcGIS map tests</h2>
+    <ol>
+        <li>
+            <h4><a href="arcgis-test.html">ArcGIS Test</a>: 11th Mar</h4>
+            <ul>
+                <li>API key created and taken from one of the Mogul developer accounts.</li>
+                <li>Simplest basic map frame test, together with 3D scene test.</li>
+            </ul>
+        </li>
+        <li>
+            <h4><a href="arcgis-test-2.html">ArcGIS geospatial test</a>: 16th Mar</h4>
+            <ul>
+                <li>ArcGIS base map test using their Graphics layer and simple marker tools.</li>
+                <li>Data aggregated from Kar Gee and cleaned up (grouped by postal code).</li>
+                <li>For more complicated UIs, if we don't overlay our own layer, we're limited by the tools they allow.</li>
+            </ul>
+        </li>
+        <li>
+            <h4><a href="mapbox-007-test1.html">Pure mapbox + D3</a>: 16th Mar</h4>
+            <ul>
+                <li>Showing mapbox integration with my D3 layer on top.</li>
+                <li>This allows me to control the UI in any which way I want, because my overlaid layers I absolutely control and can layout in any way.</li>
+                <li>Might be better to use ArcGIS for the geospatial POI data, if any. It's a difference in the tool being used by biz analysts / map makers / app developers - to discuss in next meeting.</li>
+            </ul>
+        </li>
+        <li>
+            <h4><a href="leaflet.html">Leaflet + ESRI ArcGIS + D3</a>: 17th Mar</h4>
+            <ul>
+                <li>Leaflet + D3 SVG layer + ESRI ArcGIS basemap (use ESRI's basemap plugin - urgh).</li>
+                <li>Might be the route to take, but I still love Mapbox's smooth UI + animation.</li>
+            </ul>
+        </li>
+        <li>
+            <h4><a href="leaflet-2.html">Leaflet Marker Cluster + Mapbox</a>: 18th Mar</h4>
+            <ul>
+                <li>Leaflet Marker Cluster plug-in wih Mapbox. Somehow doesn't play well with ESRI's ArcGIS Leaflet plug-in</li>
+                <li>To investigate and see if this can be resolved.</li>
+                <li>Final UI idea to be similar to <a href="http://bl.ocks.org/gisminister/10001728">this</a>.</li>
+            </ul>
+        </li>
+    </ol>
+
+    
+    <hr/>
+    <h2>Mogul-007 D3 tests</h2>
+    <ol>
+        <li>
+            <h4><a href="scatterplottest-1a.html">Scatterplot B171</a>: 26th Jan</h4>
+            <ul>
+                <li>Tested a version using <a href="scatterplottest-1b.html">Zenith resale</a> data.</li>
+                <li>Thoughts: For private resale, price per square meter (or per square feet) seems to be important. To do: interface to toggle this.</li>
+                <li>Thoughts: Need to compare units that are <i>similar</i>.</li>
+                <li>Thoughts: How far back do we need to go for the data to be relevant? 5 years? 10 years? (Set as default)</li>
+                <li>Thoughts: Interface for HDB and private resale may be different to cater to certain nuances - makes for better UX.</li>
+                <li>To do: Get more data for HDB units that are similar to Toa Payoh B171</li>
+                <li>To do: Aggregate information table - mean, variance, outliers</li>
+                <li>Information - lease leftover (current date, calculate from old lease)</li>
+            </ul>
+        </li>
+        <li>
+            <h4><a href="scatterplottest-2a.html">Scatterplot B171 - more data in surrounding area</a>: 28th Jan</h4>
+            <ul>
+                <li><a href="scatterplottest-2b.html">Normalized version</a> to price per square meter.</li>
+                <li>Refactor to be interactive (enter, update, exit)</li>
+                <li>Refactor to be more readable (charts object for parameter passing)</li>
+            </ul>
+        </li>
+        <li>
+            <h4><a href="scatterplottest-3a.html">Major version - Boxplots and interactivity.</a>: 1st Feb</h4>
+            <ul>
+                <li>Boxplot data aggregation and calculation added.</li>
+                <li>Interactivity between boxplot and scatterplot added.</li>
+            </ul>
+        </li>
+        <li>
+            <h4><a href="scatterplottest-3b.html">Filter by flats and build date added</a>: 2nd Feb</h4>
+            <ul>
+                <li>2 build dates only, and this affects lease commencement. Can immediately spot 2 outliers in the data set.</li>
+                <li>Ironed out several bugs in the enter, update and exit loop. Now correct.</li>
+                <li>Lots of small UI tweaks - CSS fonts, colors, etc.</li>
+                <li>Tried out a version with <a href="scatterplottest-3b-1.html">storey range</a> but data is messy for some buckets and not of enough quantity for analysis.</li>
+                <li>Way too many buckets (11) for an ordinal scale anyway. Need to reduce buckets to 5 or less.</li>
+                <li>To consider: Get a specific dataset for analysis for presentation on Monday 7th. Or stick with this one.</li>
+            </ul>
+        </li>
+        <li>
+            <h4><a href="scatterplottest-4a.html">Trellis price data</a>: 4th Feb</h4>
+            <ul>
+                <li>Jame's intuition is correct. The smaller the unit, the higher the price per square meter for private condos.</li>
+                <li>Generalization - for every condominium, give it a unit listing subtype.</li>
+                <li>Labels for axes, to be tweaked when animated.</li>
+                <li>x-axis scale timestamp</li>
+                <li>regression line for data sets (linear or loess)</li>
+            </ul>
+        </li>
+        <li>
+            <h4><a href="TP171.html">Toa Payoh B171</a></h4>
+            <ul>
+                <li><a href="trellis.html">Trellis</a></li>
+            </ul>
+        </li>
+        <li>
+            <h4><a href="test5a.html">Major revamp - slider and dropdown</a></h4>
+            <ul>
+                <li><a href="test5a-1.html">Slider version only</a></li>
+                <li>Major refactor - filter and chart by buttons / event hooks</li>
+                <li>Major refactor - Domain / range setup</li>
+                <li>Timescale - Bootstrap 5 range filter</li>
+                <li>Data sort so that transitions are correct</li>
+                <li>Transition touch up and revamps</li>
+                <li>TO DO: CSV form load function. Or just get Kar Gee to run the code locally on his machine.</li>
+                <li>TO DO: Some data bugs when choosing certain time scales, especially when data is huge.</li>
+            </ul>
+        </li>
+    </ol>
+    
+</body>
+</html>

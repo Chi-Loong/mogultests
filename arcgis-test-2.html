@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Arcgis test 2</title>
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+    <link rel="stylesheet" href="https://js.arcgis.com/4.22/esri/themes/light/main.css">
+    <style>
+    html, body {
+        padding: 0;
+        margin: 0;
+        width: 100%;
+        height: 100%;
+    }        
+    #viewDiv {
+        width: 100%;
+        height: 100%;
+    }
+    </style>    
+</head>
+<body>
+    <div id="viewDiv"></div>
+    
+<script src="js/papaparse.min.js"></script>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script src="https://js.arcgis.com/4.22/"></script>
+<script>
+
+require([
+    "esri/config", 
+    "esri/Map",
+    "esri/views/MapView",
+    "esri/Graphic",
+    "esri/layers/GraphicsLayer"], function (esriConfig, Map, MapView, Graphic, GraphicsLayer) {
+
+
+  esriConfig.apiKey = "AAPK9302152d7ae4460997198668c55954a6jbDR1yV5Q2g36iMOVkWnscW9wuMUArfYg7Rrj9RCM8aVa4xz9x5Z94Dh350xoUzB";
+  const map = new Map({
+    basemap: "arcgis-topographic",// Basemap layer
+    ground: "world-elevation"
+  });
+  
+  const view = new MapView({
+    map: map,
+    center: [103.85692, 1.2985],
+    zoom: 13, // scale: 72223.819286
+    container: "viewDiv",
+    constraints: {
+      snapToZoom: false
+    }
+  });
+    
+  const graphicsLayer = new GraphicsLayer();
+  map.add(graphicsLayer);
+  
+    Papa.parse("data/sengkang_hdb.csv", {
+        delimiter: ",",
+        header:true,
+        download: true,
+        complete: results =>  {        
+            let groupedData = d3.groups(results.data, d => d.postal_code) 
+            
+            groupedData.forEach(d => {                
+                let point = { //Create a point
+                    type: "point",
+                    longitude: d[1][0].longitude,
+                    latitude: d[1][0].latitude
+                };
+
+                let simpleMarkerSymbol = {
+                    type: "simple-marker",
+                    color: [0, 119, 255],  // Orange
+                    outline: {
+                        color: [255, 255, 255], // White
+                        width: 1
+                    }
+                };
+
+                let pointGraphic = new Graphic({
+                    geometry: point,
+                    symbol: simpleMarkerSymbol
+                });
+
+                graphicsLayer.add(pointGraphic);
+            });
+        }
+    });
+    
+})
+
+</script> 
+</body>
+</html>

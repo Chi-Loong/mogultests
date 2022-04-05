@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Mogul - Toa Payoh B171 area data</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Mogul UX tests">
+    <meta name="author" content="Chi-Loong (www.mogul.sg)">
+    <meta name="google-site-verification" content="..." />
+
+    <meta property="og:title" content="ArcGIS-007 test">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="viz.vslashr.com/mogul">
+    <meta property="og:description" content="ArcGIS-007 test">
+
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:site" content="@mogulsg" />
+    <meta name="twitter:creator" content="@chiloong" />
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+    <!-- <link rel="preconnect" href="https://fonts.googleapis.com"> -->
+    <!-- <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin> -->
+    <!-- <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300&display=swap" rel="stylesheet"> -->
+    
+    <style>
+        .dataPoint {
+            stroke: black;
+            stroke-width: 1px;
+        }
+        .dataPoint.selected{
+            stroke: cyan;
+            stroke-width: 2px;
+        }
+        .boxplot {
+            stroke: black;
+            stroke-width: 1px;
+        }
+        .boxplot.selected{
+            stroke: cyan;
+            stroke-width: 2px;
+        }
+		.label {
+			font-size: 12px;
+		}
+		.topLeftLogo{
+			position: fixed;
+			top: 1%;
+			left: 1%;
+		}
+		.bottomRightLogo{
+			position: fixed;
+			bottom: 1%;
+			right: 1%;
+		}
+		#aggregate_description {
+			font-size: 14px;
+		}		
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8">
+              <svg id="scatterplot"></svg>
+            </div>
+            <div class="col-md-4">
+                <div class="text-center">
+                    <h6>Chart by:</h6>
+                    <button type="button" class="btn btn-primary btn-sm" id="button_resale_price">Resale Price</button>
+                    <button type="button" class="btn btn-outline-primary btn-sm" id="button_price_per_meter_square">Price per m<sup>2</sup></button>
+                </div>
+                <div class="text-center">
+                    <h6>Filter by:</h6>
+                    <button type="button" class="btn btn-secondary btn-sm" id="button_flat_type">Flat type</button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" id="button_lease_date">Build date</button>
+                </div>
+                <div class="mt-2">
+                    <table class="table table-sm mb-0">
+                      <tbody>
+                        <tr>
+                          <td class="table-secondary" style="width:45%">Transaction month</td>
+                          <td class="table-secondary" id="transaction_month">-</td>
+                        </tr>
+                        <tr>
+                          <td class="table-secondary" style="width:45%">Resale price</td>
+                          <td class="table-secondary" id="resale_price">-</td>
+                        </tr>
+                        <tr>
+                          <td class="table-secondary" style="width:45%">Price per m<sup>2</sup></td>
+                          <td class="table-secondary" id="price_meter_square">-</td>
+                        </tr>
+                        <tr>
+                          <td style="width:45%">Address</td>
+                          <td id="address">-</td>
+                        </tr>
+                        <tr>
+                          <td style="width:45%">Floor area (sqm)</td>
+                          <td id="floor_area_sqm">-</td>
+                        </tr>
+                        <tr>
+                          <td style="width:45%">Storey range</td>
+                          <td id="storey_range">-</td>
+                        </tr>
+                        <tr>
+                          <td style="width:45%">Build date</td>
+                          <td id="lease_date">-</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                </div>
+                <svg id="boxplot"></svg>
+                <div id="aggregate_description"></div>
+            </div>
+        </div>
+    </div>
+	
+	<div class="topLeftLogo">
+		<img src="img/mogul_logo.png" width="75%" />
+	</div>
+
+	<div class="bottomRightLogo">
+		<img src="img/ESRI_logo.png" width="75%" />
+	</div>
+
+    <script src="js/papaparse.min.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script>
+                
+	let chart_by = "resale_price";	
+    let filter = "flat_type";
+    
+    Papa.parse("data/TP171_v2.csv", {
+        delimiter: ",",
+        header:true,
+        download: true,
+        complete: results =>  {
+            //console.log(results);
+
+            let charts = {
+                data: results.data,
+                timeParse: d3.timeParse("%Y-%m"), //format in CSV
+                timeFormat: d3.timeFormat("%b %Y"), // format on chrts
+                scatterplot: {
+                    height: 800,
+                    width: 800,
+                    margin: {top: 20, right: 20, bottom: 60, left: 60}
+                },
+                boxplot: {
+                    height: 300,
+                    width: 400,
+                    margin: {top: 20, right: 20, bottom: 40, left: 40}
+                }
+            };
+            
+            //Initialize y-axis to be resale price
+            charts.data.forEach(d => {
+                d.y = parseInt(d.resale_price);
+            });
+               
+            initializeScatterplot(charts);
+            initializeBoxplot(charts);
+            drawScatterplot(charts);
+            drawBoxplot(charts);
+            addEvents(charts);
+            
+            console.log(charts);
+        }
+    });
+
+function initializeScatterplot(charts) {
+    let width = charts.scatterplot.width - charts.scatterplot.margin.left - charts.scatterplot.margin.right,
+        height = charts.scatterplot.height - charts.scatterplot.margin.top - charts.scatterplot.margin.bottom;
+        
+    charts.scatterplot.graph = d3.select("#scatterplot")
+        .attr("viewBox", "0 0 " + charts.scatterplot.width + " " + charts.scatterplot.height)
+        .append("g")
+        .attr("transform", "translate(" + charts.scatterplot.margin.left + "," + charts.scatterplot.margin.top + ")");
+        
+    const timeStamp = charts.data.map(d =>  charts.timeParse(d.month));
+    const resalePrice = charts.data.map(d =>  parseInt(d.resale_price));
+    const pricePerSquareMeter = charts.data.map(d =>  parseInt(d.resale_price) / parseInt(d.floor_area_sqm));
+             
+    // Add scales
+    charts.scatterplot.xScale = d3.scaleTime()
+        .domain([d3.timeMonth.offset(d3.min(timeStamp), -3), d3.timeMonth.offset(d3.max(timeStamp), 3)])
+        .rangeRound([0, width]);
+		//.nice();
+        
+    charts.scatterplot.yScaleResalePrice = d3.scaleLinear()
+        //.domain([0, d3.max(resalePrice)])
+        .domain([parseInt(d3.min(resalePrice)) - 50000, parseInt(d3.max(resalePrice)) + 50000])
+        .rangeRound([height, 0]);
+    
+    charts.scatterplot.yScalePricePerSquareMeter = d3.scaleLinear()
+        .domain([parseInt(d3.min(pricePerSquareMeter)) - 500, parseInt(d3.max(pricePerSquareMeter)) + 500])
+        .rangeRound([height, 0]);
+    charts.scatterplot.yScale = charts.scatterplot.yScaleResalePrice;
+
+    // Add x-axis to scatterplot
+    charts.scatterplot.graph.append("g")
+        .attr("class", "axis axis-x")
+        .attr("transform", "translate(0," + height + ")")
+        .call(d3.axisBottom(charts.scatterplot.xScale)
+                .tickFormat(charts.timeFormat))
+        .selectAll("text")
+            .attr("y", 0)
+            .attr("x", -10)
+            .attr("dy", ".35em")
+            .attr("transform", "rotate(-90)")
+            .style("text-anchor", "end");
+                
+    // Add y-axis to scatterplot
+    charts.scatterplot.graph.append("g")
+        .attr("class", "axis axis-y")
+        .call(d3.axisLeft(charts.scatterplot.yScale)
+            .ticks(10)
+            .tickFormat(d3.format(".2s")));
+			
+	//labels
+    charts.scatterplot.graph.append("text")
+		.attr("class", "label x-axis")
+		.attr("y", height -10)
+		.attr("x", width)
+		.attr("text-anchor", "end")
+		.text("Sale Date");
+
+    charts.scatterplot.graph.append("text")
+		.attr("class", "label y-axis")
+		.attr("y", 0)
+		.attr("x", 10)
+		.attr("text-anchor", "start")
+		.text("Resale Price");			
+}
+
+function initializeBoxplot(charts) {
+    let width = charts.boxplot.width - charts.boxplot.margin.left - charts.boxplot.margin.right,
+        height = charts.boxplot.height - charts.boxplot.margin.top - charts.boxplot.margin.bottom;
+        
+    charts.boxplot.graph = d3.select("#boxplot")
+        .attr("viewBox", "0 0 " + charts.boxplot.width + " " + charts.boxplot.height)
+        .append("g")
+        .attr("transform", "translate(" + charts.boxplot.margin.left + "," + charts.boxplot.margin.top + ")");
+         
+    const resalePrice = charts.data.map(d =>  parseInt(d.resale_price));
+    const pricePerSquareMeter = charts.data.map(d =>  parseInt(d.resale_price) / parseInt(d.floor_area_sqm));
+    const flatDomain = [...new Set(charts.data.map(d => d.flat_type))].sort();
+    const leaseDomain = [...new Set(charts.data.map(d => d.lease_commence_date))].sort();
+    
+    // Add color Scales
+    charts.colorScaleFlats = d3.scaleOrdinal()
+        .domain(flatDomain)
+        .range(d3.schemeSet1);
+
+    charts.colorScaleLeaseDate = d3.scaleOrdinal()
+        .domain(leaseDomain)
+        .range(d3.schemeSet3);
+
+    // Add scales
+    charts.boxplot.xScaleFlats = d3.scaleBand()
+    .domain(flatDomain)
+    .rangeRound([0, width])
+    .padding(0.1);
+
+    charts.boxplot.xScaleLeaseDate = d3.scaleBand()
+    .domain(leaseDomain)
+    .rangeRound([0, width])
+    .padding(0.1);
+    charts.boxplot.xScale = charts.boxplot.xScaleFlats;
+
+    charts.boxplot.yScaleResalePrice = d3.scaleLinear()
+        //.domain([0, d3.max(resalePrice)])
+        .domain([parseInt(d3.min(resalePrice)) - 50000, parseInt(d3.max(resalePrice)) + 50000])
+        .rangeRound([height, 0]);
+    
+    charts.boxplot.yScalePricePerSquareMeter = d3.scaleLinear()
+        .domain([parseInt(d3.min(pricePerSquareMeter)) - 500, parseInt(d3.max(pricePerSquareMeter)) + 500])
+        .rangeRound([height, 0]);
+    charts.boxplot.yScale = charts.boxplot.yScaleResalePrice;
+
+    // Add axes
+    charts.boxplot.graph.append("g")
+        .attr("class", "axis axis-x")
+        .attr("transform", "translate(0," + height + ")")
+        .call(d3.axisBottom(charts.boxplot.xScale));
+        
+    charts.boxplot.graph.append("g")
+        .attr("class", "axis axis-y")
+        .call(d3.axisLeft(charts.boxplot.yScale)
+            .ticks(10)
+            .tickFormat(d3.format(".2s")));
+			
+	//labels
+    charts.boxplot.graph.append("text")
+		.attr("class", "label x-axis")
+		.attr("y", height -10)
+		.attr("x", width)
+		.attr("text-anchor", "end")
+		.text("Flat Type");
+
+    charts.boxplot.graph.append("text")
+		.attr("class", "label y-axis")
+		.attr("y", 0)
+		.attr("x", 10)
+		.attr("text-anchor", "start")
+		.text("Resale Price");			
+}
+
+function drawScatterplot(charts) {
+charts.scatterplot.graph
+    .selectAll("circle")
+    .data(charts.data)
+    .join(
+    enter => enter
+        .append("circle")
+        .attr("cx", d => charts.scatterplot.xScale(charts.timeParse(d.month)))
+        .attr("cy", d => charts.scatterplot.yScale(d.y))
+        .attr("class", "dataPoint")
+        .attr("fill", d => { if (filter == "flat_type") return charts.colorScaleFlats(d.flat_type); else if (filter == "lease_date") return charts.colorScaleLeaseDate(d.lease_commence_date)})
+        .attr("r", 0)
+        .on("mouseover", (event, d) => {
+            d3.select(event.currentTarget)
+                .classed("selected", true);
+            d3.select("#address").text(d.street_name + " " + d.block);
+            d3.select("#floor_area_sqm").text(d.floor_area_sqm + " (" + d.flat_model + ")");
+            d3.select("#storey_range").text(d.storey_range);
+            d3.select("#lease_date").text(d.lease_commence_date);
+            d3.select("#transaction_month").text(charts.timeFormat(charts.timeParse(d.month)));
+            d3.select("#resale_price").text("S$" + d3.format(",.2d")(d.resale_price));
+            d3.select("#price_meter_square").text("S$" + d3.format(",.2d")(parseInt(d.resale_price) / parseInt(d.floor_area_sqm)));
+        })
+        .on("mouseout", (event, d) => {
+            d3.select(event.currentTarget)
+                .classed("selected", false);
+            d3.select("#address").text("-");
+            d3.select("#floor_area_sqm").text("-");
+            d3.select("#storey_range").text("-");
+            d3.select("#lease_date").text("_");
+            d3.select("#transaction_month").text("-");
+            d3.select("#resale_price").text("-");
+            d3.select("#price_meter_square").text("-");
+        })
+      .call(enter => enter.transition()
+        .duration(1000)
+        .attr("r", 7)
+       ),
+    update => update 
+      .call(update => update.transition()
+        .duration(1000)
+        .attr("fill", d => { if (filter == "flat_type") return charts.colorScaleFlats(d.flat_type); else if (filter == "lease_date") return charts.colorScaleLeaseDate(d.lease_commence_date)})
+        .attr("cx", d => charts.scatterplot.xScale(charts.timeParse(d.month)))
+        .attr("cy", d => charts.scatterplot.yScale(d.y))
+       ),
+    exit => exit
+      .call(exit => exit.transition()
+        .duration(1000)
+        .attr("r", 0)
+        .remove()
+       )
+    )
+}
+
+function drawBoxplot(charts) {
+
+let rawData = [];
+let boxplotData = [];
+
+if (filter == "flat_type") { 
+   rawData = d3.groups(charts.data, d => d.flat_type) 
+} else if (filter == "lease_date") { 
+   rawData = d3.groups(charts.data, d => d.lease_commence_date) 
+};
+
+rawData.forEach(d => {
+    classData = {}
+    classData.label = d[0];
+    classData.yValues = d[1].map(e => e.y);
+    classData.median = d3.median(classData.yValues);
+    classData.min = d3.min(classData.yValues);
+    classData.max = d3.max(classData.yValues);
+    classData.quartile25 = d3.quantile(classData.yValues, 0.25);
+    classData.quartile75 = d3.quantile(classData.yValues, 0.75);
+    boxplotData.push(classData);
+});
+
+charts.boxplot.graph
+    .selectAll("g.boxplot")
+    .data(boxplotData)
+    .join(
+    enter => { 
+        let boxplot = enter
+        .append("g")
+        .attr("class", "boxplot")
+        .on("mouseover", (event, d) => {
+			if (chart_by == "resale_price") {
+            d3.select("#aggregate_description").html("<p>The median price is <b>" + d3.format("$,.2d")(d.median) + "</b>.</p>"
+                + "<p>The middle 50% of units sold are in the range from <b>" + d3.format("$,.2d")(d.quartile25) + "</b> to <b>" + d3.format("$,.2d")(d.quartile75) + "</b>.</p>"
+                + "<p>The max price is <b>" + d3.format("$,.2d")(d.max) + "</b> and the min price is <b>" + d3.format("$,.2d")(d.min) + "</b>.</p>");
+			} else if (chart_by == "price_per_meter_square") {
+            d3.select("#aggregate_description").html("<p>The median price per meter square is <b>" + d3.format("$,.2d")(d.median) + "</b>.</p>"
+                + "<p>The middle 50% of units sold have a price per meter square range from <b>" + d3.format("$,.2d")(d.quartile25) + "</b> to <b>" + d3.format("$,.2d")(d.quartile75) + "</b>.</p>"
+                + "<p>The max price per meter square is <b>" + d3.format("$,.2d")(d.max) + "</b> and the min price per meter square is <b>" + d3.format("$,.2d")(d.min) + "</b>.</p>");
+			};
+			
+            d3.select(event.currentTarget)
+            .classed("selected", true);
+        })
+        .on("mouseout", (event, d) => {
+            d3.select("#aggregate_description").text("");
+            d3.select(event.currentTarget)
+            .classed("selected", false);
+        });
+        
+        // 25 and 75 quartiles
+        let rect = boxplot
+        .append("rect")
+        .attr("class", "quartiles")
+        .attr("x", d => charts.boxplot.xScale(d.label) + charts.boxplot.xScale.bandwidth() / 2)
+        .attr("y", d => (charts.boxplot.yScale(d.quartile25) + charts.boxplot.yScale(d.quartile75)) / 2)
+        .attr("width", 0)
+        .attr("height", 0)
+        .attr("fill", d => { if (filter == "flat_type") return charts.colorScaleFlats(d.label); else if (filter == "lease_date") return charts.colorScaleLeaseDate(d.label)})
+        
+        //median
+        let median = boxplot
+        .append("line")
+        .attr("class", "median")
+        .attr("x1", d => charts.boxplot.xScale(d.label) + charts.boxplot.xScale.bandwidth() / 2)
+        .attr("y1", d => charts.boxplot.yScale(d.median))
+        .attr("x2", d => charts.boxplot.xScale(d.label) + charts.boxplot.xScale.bandwidth() / 2)
+        .attr("y2", d => charts.boxplot.yScale(d.median));
+        
+        //max
+        let maxline = boxplot
+        .append("line")
+        .attr("class", "maxline")
+        .attr("x1", d => charts.boxplot.xScale(d.label) + charts.boxplot.xScale.bandwidth() / 2)
+        .attr("y1", d => charts.boxplot.yScale(d.quartile75))
+        .attr("x2", d => charts.boxplot.xScale(d.label) + charts.boxplot.xScale.bandwidth() / 2)
+        .attr("y2", d => charts.boxplot.yScale(d.quartile75));
+
+        //min
+        let minline = boxplot
+        .append("line")
+        .attr("class", "minline")
+        .attr("x1", d => charts.boxplot.xScale(d.label) + charts.boxplot.xScale.bandwidth() / 2)
+        .attr("y1", d => charts.boxplot.yScale(d.quartile25))
+        .attr("x2", d => charts.boxplot.xScale(d.label) + charts.boxplot.xScale.bandwidth() / 2)
+        .attr("y2", d => charts.boxplot.yScale(d.quartile25));
+
+      enter
+      .call(enter => { 
+        rect.transition()
+        .duration(1000)
+        .attr("x", d => charts.boxplot.xScale(d.label))
+        .attr("y", d => charts.boxplot.yScale(d.quartile75))
+        .attr("width", charts.boxplot.xScale.bandwidth())
+        .attr("height", d => charts.boxplot.yScale(d.quartile25) - charts.boxplot.yScale(d.quartile75));
+        
+        median.transition()
+        .duration(2000)
+        .attr("x1", d => charts.boxplot.xScale(d.label))
+        .attr("y1", d => charts.boxplot.yScale(d.median))
+        .attr("x2", d => charts.boxplot.xScale(d.label) + charts.boxplot.xScale.bandwidth())
+        .attr("y2", d => charts.boxplot.yScale(d.median));
+        
+        maxline.transition()
+        .duration(2000)
+        .attr("x1", d => charts.boxplot.xScale(d.label) + charts.boxplot.xScale.bandwidth() / 2)
+        .attr("y1", d => charts.boxplot.yScale(d.max))
+        .attr("x2", d => charts.boxplot.xScale(d.label) + charts.boxplot.xScale.bandwidth() / 2)
+        .attr("y2", d => charts.boxplot.yScale(d.quartile75));
+        
+        minline.transition()
+        .duration(2000)
+        .attr("x1", d => charts.boxplot.xScale(d.label) + charts.boxplot.xScale.bandwidth() / 2)
+        .attr("y1", d => charts.boxplot.yScale(d.min))
+        .attr("x2", d => charts.boxplot.xScale(d.label) + charts.boxplot.xScale.bandwidth() / 2)
+        .attr("y2", d => charts.boxplot.yScale(d.quartile25));
+        })
+       },
+    update => update 
+      .call(update => {
+        update.select("rect.quartiles")
+        .transition()
+        .duration(1000)
+        .attr("x", d => charts.boxplot.xScale(d.label))
+        .attr("y", d => charts.boxplot.yScale(d.quartile75))
+        .attr("width", charts.boxplot.xScale.bandwidth())
+        .attr("height", d => charts.boxplot.yScale(d.quartile25) - charts.boxplot.yScale(d.quartile75))
+        .attr("fill", d => { if (filter == "flat_type") return charts.colorScaleFlats(d.label); else if (filter == "lease_date") return charts.colorScaleLeaseDate(d.label)});
+
+        update.select("line.median")
+        .transition()
+        .duration(1000)
+        .attr("x1", d => charts.boxplot.xScale(d.label))
+        .attr("y1", d => charts.boxplot.yScale(d.median))
+        .attr("x2", d => charts.boxplot.xScale(d.label) + charts.boxplot.xScale.bandwidth())
+        .attr("y2", d => charts.boxplot.yScale(d.median));
+        
+        update.select("line.maxline")
+        .transition()
+        .duration(1000)
+        .attr("x1", d => charts.boxplot.xScale(d.label) + charts.boxplot.xScale.bandwidth() / 2)
+        .attr("y1", d => charts.boxplot.yScale(d.max))
+        .attr("x2", d => charts.boxplot.xScale(d.label) + charts.boxplot.xScale.bandwidth() / 2)
+        .attr("y2", d => charts.boxplot.yScale(d.quartile75));
+        
+        update.select("line.minline")
+        .transition()
+        .duration(1000)
+        .attr("x1", d => charts.boxplot.xScale(d.label) + charts.boxplot.xScale.bandwidth() / 2)
+        .attr("y1", d => charts.boxplot.yScale(d.min))
+        .attr("x2", d => charts.boxplot.xScale(d.label) + charts.boxplot.xScale.bandwidth() / 2)
+        .attr("y2", d => charts.boxplot.yScale(d.quartile25));
+       }),
+    exit => exit
+      .call(exit => { 
+         exit.remove();
+       })
+    )
+}
+
+function addEvents(charts) {
+   d3.select("#button_resale_price").on("click", () => {
+       chart_by = "resale_price";
+       charts.data.forEach(d => {
+            d.y = parseInt(d.resale_price);
+       });
+       
+       d3.select("#button_resale_price").classed("btn-primary", true).classed("btn-outline-primary", false);
+       d3.select("#button_price_per_meter_square").classed("btn-primary", false).classed("btn-outline-primary", true);
+       
+       charts.scatterplot.yScale = charts.scatterplot.yScaleResalePrice;
+       charts.scatterplot.graph.select("g .axis-y")
+            .transition()
+            .duration(1000)
+            .call(d3.axisLeft(charts.scatterplot.yScale)
+                .ticks(10)
+                .tickFormat(d3.format(".2s")));
+       drawScatterplot(charts);
+        
+       charts.boxplot.yScale = charts.boxplot.yScaleResalePrice;
+       charts.boxplot.graph.select("g .axis-y")
+            .transition()
+            .duration(1000)
+            .call(d3.axisLeft(charts.boxplot.yScale)
+                .ticks(10)
+                .tickFormat(d3.format(".2s")));
+       drawBoxplot(charts);
+	   
+	   charts.scatterplot.graph.select("text.label.y-axis").text("Resale Price");
+	   charts.boxplot.graph.select("text.label.y-axis").text("Resale Price");	   
+   });
+
+   d3.select("#button_price_per_meter_square").on("click", () => {
+       chart_by = "price_per_meter_square";
+        charts.data.forEach(d => {
+            d.y = parseInt(d.resale_price) / parseInt(d.floor_area_sqm);
+        });
+        
+       d3.select("#button_resale_price").classed("btn-primary", false).classed("btn-outline-primary", true);
+       d3.select("#button_price_per_meter_square").classed("btn-primary", true).classed("btn-outline-primary", false);
+
+        charts.scatterplot.yScale = charts.scatterplot.yScalePricePerSquareMeter;
+        charts.scatterplot.graph.select("g .axis-y")
+            .transition()
+            .duration(1000)
+            .call(d3.axisLeft(charts.scatterplot.yScale));
+        drawScatterplot(charts);
+    
+       charts.boxplot.yScale = charts.boxplot.yScalePricePerSquareMeter;
+       charts.boxplot.graph.select("g .axis-y")
+            .transition()
+            .duration(1000)
+            .call(d3.axisLeft(charts.boxplot.yScale));
+       drawBoxplot(charts);
+	   
+	   charts.scatterplot.graph.select("text.label.y-axis").text("Price per meter square");
+	   charts.boxplot.graph.select("text.label.y-axis").text("Price per meter square");	   	   
+   });
+   
+   d3.select("#button_flat_type").on("click", () => {
+       filter = "flat_type";
+       d3.select("#button_flat_type").classed("btn-secondary", true).classed("btn-outline-secondary", false);
+       d3.select("#button_lease_date").classed("btn-secondary", false).classed("btn-outline-secondary", true);
+       
+       drawScatterplot(charts);
+       
+       charts.boxplot.xScale = charts.boxplot.xScaleFlats;
+       charts.boxplot.graph.select("g .axis-x")
+            .transition()
+            .duration(1000)
+            .call(d3.axisBottom(charts.boxplot.xScale));
+       drawBoxplot(charts);
+	   
+	   charts.boxplot.graph.select("text.label.x-axis").text("Flat Type");	   
+   });
+
+   d3.select("#button_lease_date").on("click", () => {
+       filter = "lease_date";
+       d3.select("#button_lease_date").classed("btn-secondary", true).classed("btn-outline-secondary", false);
+       d3.select("#button_flat_type").classed("btn-secondary", false).classed("btn-outline-secondary", true);
+       
+       drawScatterplot(charts);
+       
+       charts.boxplot.xScale = charts.boxplot.xScaleLeaseDate;
+       charts.boxplot.graph.select("g .axis-x")
+            .transition()
+            .duration(1000)
+            .call(d3.axisBottom(charts.boxplot.xScale));
+       drawBoxplot(charts);
+	   
+	   charts.boxplot.graph.select("text.label.x-axis").text("Build Date");
+   });
+   
+}
+
+</script>
+</body>
+</html>

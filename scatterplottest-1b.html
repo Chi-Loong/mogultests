@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Pricing scatterplot test</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="One Meyer F4 Test">
+    <meta name="author" content="Chi-Loong (www.mogul.sg)">
+    <meta name="google-site-verification" content="..." />
+
+    <meta property="og:title" content="Pricing scatterplot test">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="viz.vslashr.com/mogul">
+    <meta property="og:description" content="Pricing scatterplot test">
+
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:site" content="@mogulsg" />
+    <meta name="twitter:creator" content="@chiloong" />
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300&display=swap" rel="stylesheet">
+    
+    <style>
+        p {
+          font-family: 'Montserrat', sans-serif;
+          color: black;
+        }
+        .dataPoint {
+            stroke: black;
+            stroke-width: 1px;
+        }
+        .dataPoint.selected{
+            stroke: red;
+            stroke-width: 2px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-md-9">
+              <svg id="chart"></svg>
+            </div>
+            <div class="col-md-3">
+                <h5 class="text-center">Unit transaction details</h5>
+                <table class="table small">
+                  <tbody>
+                    <tr>
+                      <td class="table-secondary" style="width:40%">Transaction Month</td>
+                      <td class="table-secondary" id="transaction_month">-</td>
+                    </tr>
+                    <tr>
+                      <td class="table-secondary" style="width:40%">Resale price</td>
+                      <td class="table-secondary" id="resale_price">-</td>
+                    </tr>
+                    <tr>
+                      <td style="width:40%">Project</td>
+                      <td id="project">-</td>
+                    </tr>
+                    <tr>
+                      <td style="width:40%">Address</td>
+                      <td id="address">-</td>
+                    </tr>
+                    <tr>
+                      <td style="width:40%">Floor area (sqm)</td>
+                      <td id="floor_area_sqm">-</td>
+                    </tr>
+                  </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/papaparse.min.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script>
+    //console.log(window.innerWidth);
+                
+    Papa.parse("data/zenith.csv", {
+        delimiter: ",",
+        header:true,
+        download: true,
+        complete: results =>  {
+            //console.log(results);
+            let graph = {
+                data: results.data,
+                timeParse: d3.timeParse("%d/%m/%Y"),
+                timeFormat: d3.timeFormat("%b %Y")
+            };
+            initializeChart(graph);
+            drawChart(graph);
+            console.log(graph);
+        }
+    });
+
+function initializeChart(graph) {
+    let margin = {top: 20, right: 20, bottom: 60, left: 60},
+        width = 800 - margin.left - margin.right,
+        height = 800 - margin.top - margin.bottom;
+    let chart = d3.select("#chart")
+        .attr("viewBox", "0 0 800 800")
+        .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    graph.chart = chart;
+        
+    const timeStamp = graph.data.map(d =>  graph.timeParse(d.sale_date));
+    const resalePrice = graph.data.map(d =>  parseInt(d.transaction_price_dollars));
+        
+    // Add scales
+    let xScale = d3.scaleLinear()
+        .domain([d3.timeMonth.offset(d3.min(timeStamp), -3), d3.timeMonth.offset(d3.max(timeStamp), 3)])
+        .rangeRound([0, width]);
+    graph.xScale = xScale;
+        
+    let yScale = d3.scaleLinear()
+        .domain([parseInt(d3.min(resalePrice)) - 50000, parseInt(d3.max(resalePrice)) + 50000])
+        .rangeRound([height, 0]);
+        
+    graph.yScale = yScale;
+        
+    // Add x-axis
+    chart.append("g")
+        .attr("class", "axis axis-x")
+        .attr("transform", "translate(0," + height + ")")
+        .call(d3.axisBottom(xScale)
+                .tickFormat(graph.timeFormat))
+        .selectAll("text")
+            .attr("y", 0)
+            .attr("x", -10)
+            .attr("dy", ".35em")
+            .attr("transform", "rotate(-90)")
+            .style("text-anchor", "end");
+                
+    // Add y-axis
+    chart.append("g")
+        .attr("class", "axis axis-y")
+        .call(d3.axisLeft(yScale)
+                .ticks(10));
+}
+    
+//Sample enter, update and exit loop
+function drawChart(graph) {
+
+/*
+xScale.domain(dataSet.map(function(d) { return d.student; }));
+chart.select("g .axis-x")
+    .transition()
+    .duration(1000)
+    .call(d3.axisBottom(xScale));
+*/
+
+graph.chart
+    .selectAll("circle")
+    .data(graph.data)
+    .join(
+    enter => enter
+        .append("circle")
+        .attr("cx", d => graph.xScale(graph.timeParse(d.sale_date)))
+        .attr("cy", d => graph.yScale(d.transaction_price_dollars))
+        .attr("class", "dataPoint")
+        .attr("fill", "#2ECC71")
+        .attr("r", 0)
+        .on("mouseover", (event, d) => {
+            d3.select(event.currentTarget)
+                .classed("selected", true);
+            d3.select("#project").text(d.project_name);
+            d3.select("#address").text(d.address);
+            d3.select("#floor_area_sqm").text(d.area_sqm);
+            d3.select("#transaction_month").text(graph.timeFormat(graph.timeParse(d.sale_date)));
+            d3.select("#resale_price").text("S$" + d3.format(",.2r")(d.transaction_price_dollars));
+        })
+        .on("mouseout", (event, d) => {
+            d3.select(event.currentTarget)
+                .classed("selected", false);
+            d3.select("#project").text("-");
+            d3.select("#address").text("-");
+            d3.select("#floor_area_sqm").text("-");
+            d3.select("#transaction_month").text("-");
+            d3.select("#resale_price").text("-");
+        })
+      .call(enter => enter.transition()
+        .duration(1000)
+        .attr("r", 5)
+       ),
+    update => update 
+      .call(update => update.transition()
+        .duration(1000)
+        .attr("cx", d => graph.xScale(d.sale_date))
+        .attr("cy", d => graph.yScale(d.transaction_price_dollars))
+       ),
+    exit => exit
+      .call(exit => exit.transition()
+        .duration(1000)
+        .attr("r", 0)
+        .remove()
+       )
+    );
+}
+
+/*
+d3.select("#bt1").on("click", function() {
+    drawChart(data);
+});
+d3.select("#bt2").on("click", function() {
+    drawChart(data2);
+});
+*/
+    </script>
+</body>
+</html>

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>One Meyer F4 Test</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="One Meyer F4 Test">
+    <meta name="author" content="Chi-Loong (www.mogul.sg)">
+    <meta name="google-site-verification" content="..." />
+
+    <meta property="og:title" content="One Meyer F4 Test">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="viz.vslashr.com/mogul">
+    <meta property="og:description" content="One Meyer F4 Test">
+
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:site" content="@mogulsg" />
+    <meta name="twitter:creator" content="@chiloong" />
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300&display=swap" rel="stylesheet">
+    
+    <style>
+        p {
+          font-family: 'Montserrat', sans-serif;
+          color: #000;
+        }
+        h4, h5 {
+          font-family: 'Montserrat', sans-serif;
+          text-transform: uppercase;
+        }
+        #map {
+          width: 100%;
+          height: 600px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-8">
+                <img class="img-fluid" src="img/logo1.png"/>
+            </div>
+            <div class="col-md-4">
+                <h4 class="pt-4">Immeasurable luxury.</h4>
+                <h4>Perfected.</h4>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+              <div id="map"></div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <img class="pt-4" src="img/s3.jpg" width="100%" />
+                <p class="pt-4">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce eleifend ligula nisi, vel laoreet quam vehicula eu. Suspendisse scelerisque erat enim, commodo tempor lorem ornare pulvinar.</p>
+                <p>Duis sed convallis risus, vel laoreet mi. Nam tincidunt lorem vitae lacus ullamcorper, nec efficitur turpis ullamcorper. Phasellus vitae nisl hendrerit, vulputate augue sit amet, ultrices magna. Duis dui urna, luctus nec rutrum eu, porta id mauris.</p>
+            </div>
+            <div class="col-md-6">
+                <img class="pt-4" src="img/s4.jpg" width="100%" />
+            </div>
+        </div>
+    </div>
+
+    <script src="https://core.f4map.com/api.js?api_key=1Q72XC7B00SQA7S57UNV8XQ0Q4ZSTKY5KHSDAT7S"></script>
+    <script>
+    
+        //console.log(window.innerWidth);
+        
+        let mapOptions = {
+            zoom: window.innerWidth < 600? 17 : 18,
+            center: new f4.map.LatLng(1.2961, 103.891)
+        }
+        
+        let map = new f4.map.Map(document.getElementById('map'), mapOptions);
+        
+        let marker = new f4.map.Marker({
+            position: new f4.map.LatLng(1.295198, 103.892418),
+            map: map,
+            title: "91111 CP B1",
+            icon: {
+                url: "img/bus-stop.png",
+            }
+        });
+        
+        let infowindow = new f4.map.InfoWindow({
+            minWidth: 100,
+            maxWidth: 300,
+            content: "<h6>Buses<h6><button type='button' class='btn btn-danger btn-sm' id='testbutton'>401</button>"
+        });
+        
+        console.log(map);
+        console.log(infowindow);
+        
+        f4.map.event.addListener(marker, 'click', (event) => {
+            console.log(event);
+            infowindow.open(map, marker);
+            /*
+            let box = document.createElement("div");
+            box.backgroundColor = "black";
+            box.addEventListener("click", (e) => {
+                e.stopPropagation();
+                console.log("Hello World");
+            })
+            */
+        });
+        
+        let precipitationLayer = new f4.map.weather.PrecipitationLayer();
+        console.log(precipitationLayer);
+        
+        precipitationLayer.setMap(map);
+        precipitationLayer.setType(f4.map.weather.PrecipitationType.MODERATE_RAIN);
+        
+        let date = new Date(2022, 0, 25, 21, 24, 0);
+        map.setDate(new Date());
+        
+    </script>
+</body>
+</html>
