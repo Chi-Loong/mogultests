@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Mogul - Amber Gardens Test</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Mogul UX tests">
+    <meta name="author" content="Chi-Loong (www.mogul.sg)">
+    <meta name="google-site-verification" content="..." />
+
+    <meta property="og:title" content="SVG test">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="viz.vslashr.com/mogul">
+    <meta property="og:description" content="SVG test">
+
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:site" content="@mogulsg" />
+    <meta name="twitter:creator" content="@chiloong" />
+
+    <style>
+	.container {
+		position: relative;
+		width: 100%;
+	}
+	.base-image {
+		position: relative;
+		left: 0;
+		top: 0;
+	}
+	.overlay {
+		position: absolute;
+		width: 100%;
+		height: 100%;
+		left: 0px;
+		top: 0px;
+	}
+	.block-path {
+		fill: gray;
+		opacity: 0.05;
+	}
+	.block-path.selected {
+		fill: cyan;
+		stroke: blue;
+		stroke-width: 10px;
+		opacity: 1;
+	}
+    </style>
+</head>
+<body>
+<div class="container">
+	<div class="base-image">
+		<img src="img/amber_gardens.jpg" width="100%">
+	</div>
+	<div class="overlay">
+		<svg
+		   viewBox="0 0 1728 1117"
+		   xmlns="http://www.w3.org/2000/svg"
+		   xmlns:svg="http://www.w3.org/2000/svg">
+		  <path
+			 id="AG_B16"
+			 class="block-path"
+			 d="m 650.25,695.19 203.57,245.05 151.1,-11.03 -20.94,-56.03 -75.27,5.37 -41.59,-46.4 39.89,-33.11 19.81,22.64 36.22,-7.36 -131.86,-157.9 -130.17,10.75 z" />
+		  <path
+			 id="AG_B18"
+			 class="block-path"
+			 d="m 639.56,544.25 -58.38,14.25 -41.13,-123.49 175.59,-244.6 61.48,42.91 33.62,101.28 -117.66,155.7 -11.06,-28.31 9.95,-13.53 -54.18,-44.86 -30.96,41.58 z" />
+		  <path
+			 id="AG_B18A"
+			 class="block-path"
+			 d="m 1054.22,158.38 118.89,189.08 -36.52,1.8 -10.39,-18.27 -50.13,27.94 25.78,40.82 118.18,6.44 9.31,58.74 -179.42,-6.81 -149.33,-235.63 -6.09,-47.27 z" />
+		</svg>
+	</div>	
+</div>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script>
+
+let blocks = [ 
+	{id: "AG_B16"},
+	{id: "AG_B18"},
+	{id: "AG_B18A"}
+]
+
+d3.selectAll("svg path")
+.data(blocks)  // reactive binding to each path
+.on("mouseover", (event, d) => {
+	console.log(event);  
+	console.log(d);
+	d3.select(event.currentTarget)
+	.classed("selected", true);
+}) 
+.on("mouseout", (event, d) => {
+	d3.select(event.currentTarget)
+	.classed("selected", false);
+})
+
+
+</script>
+</body>
+</html>
