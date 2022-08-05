@@ -24,13 +24,13 @@ const map = new mapboxgl.Map({
 	container: 'map',
 	style: 'mapbox://styles/mapbox/light-v10',
 	zoom: 18,
-	center: [103.85692, 1.2985],
+	center: [103.8403333, 1.3158396],
 	pitch: 60,
 	antialias: true // create the gl context with MSAA antialiasing, so custom layers are antialiased
 });
  
 // parameters to ensure the model is georeferenced correctly on the map
-const modelOrigin = [103.85692, 1.2987];
+const modelOrigin = [103.8403333, 1.3158396];
 const modelAltitude = 0;
 const modelRotate = [Math.PI / 2, 0, 0];
  
@@ -50,7 +50,7 @@ const modelTransform = {
 	/* Since the 3D model is in real world meters, a scale transform needs to be
 	* applied since the CustomLayerInterface expects units in MercatorCoordinates.
 	*/
-	scale: modelAsMercatorCoordinate.meterInMercatorCoordinateUnits() * 0.8
+	scale: modelAsMercatorCoordinate.meterInMercatorCoordinateUnits() * 1
 };
  
 const THREE = window.THREE;
@@ -83,7 +83,7 @@ const customLayer = {
 	// use the three.js GLTF loader to add the 3D model to the three.js scene
 	const loader = new THREE.GLTFLoader();
 	loader.load(
-	'model/midtown_modern.glb',
+	'model/enchante.glb',
 	(gltf) => {
 	this.scene.add(gltf.scene);
 	}
